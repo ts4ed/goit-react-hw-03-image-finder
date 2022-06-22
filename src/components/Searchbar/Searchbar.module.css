@@ -29,7 +29,7 @@
 
 .SearchForm__button {
   display: inline-block;
-  width: 48px;
+  width: 55px;
   height: 48px;
   border: 0;
   background-image: url('https://image.flaticon.com/icons/svg/149/149852.svg');
@@ -46,9 +46,9 @@
   opacity: 1;
 }
 
-/* .SearchForm__button-label {
+.SearchForm__button-label {
   position: absolute;
-  width: 1px;
+  width: 10px;
   height: 1px;
   padding: 0;
   overflow: hidden;
@@ -56,7 +56,7 @@
   white-space: nowrap;
   clip-path: inset(50%);
   border: 0;
-} */
+}
 
 .SearchForm__input {
   display: inline-block;
