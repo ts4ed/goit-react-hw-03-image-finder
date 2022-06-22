@@ -101,7 +101,7 @@ export default class ImageGallery extends Component {
               />
             ))}
           </ul>
-          <Button loadMore={loadMore} />
+          {imgs.length >= 12 && <Button loadMore={loadMore} />}
         </div>
       );
     }
