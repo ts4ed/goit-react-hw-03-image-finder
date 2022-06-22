@@ -27,3 +27,13 @@
   transform: scale(1.03);
   cursor: zoom-in;
 }
+.Error {
+  display: flex;
+  justify-content: center;
+}
+.Button {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
