@@ -6,6 +6,13 @@ import Button from '../Button/Button';
 import pixabayAPI from '../../Services/pixabay-api';
 import s from './ImageGallery.module.css';
 
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+
 export default class ImageGallery extends Component {
   state = {
     page: 1,
@@ -23,10 +30,10 @@ export default class ImageGallery extends Component {
     const REQUEST = this.props.request;
     if (prevProps.request !== this.props.request) {
       if (REQUEST !== '') {
-        this.setState({ status: 'panding', page: 1, images: null });
+        this.setState({ status: Status.PENDING, page: 1, images: null });
         pixabayAPI(REQUEST, PAGE, KEY, PER_PAGE)
-          .then(images => this.setState({ images, status: 'resolved' }))
-          .catch(error => this.setState({ error, status: 'rejected' }));
+          .then(images => this.setState({ images, status: Status.RESOLVED }))
+          .catch(error => this.setState({ error, status: Status.REJECTED }));
       }
     }
     if (prevState.page + 1 === this.state.page) {
@@ -69,17 +76,17 @@ export default class ImageGallery extends Component {
     const { request } = this.props;
     const { status, showModal, toggleModal, data } = this.state;
 
-    if (status === 'panding') {
+    if (status === Status.PENDING) {
       return <Loader />;
     }
-    if (status === 'rejected' || (imgs && imgs.length === 0)) {
+    if (status === Status.REJECTED || (imgs && imgs.length === 0)) {
       return (
         <div className={s.Error}>
           Что то пошло не так. Ваш запрос "{request}" не найден
         </div>
       );
     }
-    if (status === 'resolved') {
+    if (status === Status.RESOLVED) {
       return (
         <div className={s.Button}>
           {showModal && (
