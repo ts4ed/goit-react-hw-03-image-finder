@@ -1,7 +1,11 @@
-export default function fetchPixabay(request, page, key, per_page) {
+export default function fetchPixabay(nextName, page) {
+  const BASE_URL = 'https://pixabay.com/api/';
+  const KEY = '27923124-abae4833d2be49fca3c02a38e';
   return fetch(
-    `https://pixabay.com/api/?q=${request}&page=${page}&key=${key}&image_type=photo&orientation=horizontal&per_page=${per_page}`
-  )
-    .then(res => res.json())
-    .then(respons => respons.hits);
+    `${BASE_URL}?q=${nextName}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`
+  ).then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+  });
 }
