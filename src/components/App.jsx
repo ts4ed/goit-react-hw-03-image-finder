@@ -8,123 +8,107 @@ import Modal from './Modal/Modal';
 import Button from './Button/Button';
 import pixabayAPI from '../Services/pixabay-api';
 
-const Status = {
-  IDLE: 'idle',
-  PENDING: 'pending',
-  RESOLVED: 'resolved',
-  REJECTED: 'rejected',
-};
-
 export default class App extends Component {
   state = {
-    request: '',
-    page: 1,
-    search: '',
-    images: null,
+    searchRequest: '',
+    images: [],
+    galleryPage: 1,
     error: null,
-    status: 'idle',
-    showModal: false,
-    data: null,
+    isLoading: false,
+    showModal: null,
   };
+
   componentDidUpdate(prevProps, prevState) {
-    const prevName = prevState.request;
-    const nextName = this.state.request;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
+    const prevSearch = prevState.searchRequest;
+    const currentSearch = this.state.searchRequest;
+    const prevGalleryPage = prevState.galleryPage;
+    const currentGalleryPage = this.state.galleryPage;
 
-    if (prevName !== nextName) {
-      this.setState({ status: Status.PENDING, page: 1, images: null });
-      this.fetchImages(nextName, nextPage);
-    }
-    if (prevPage !== nextPage) {
-      this.fetchImages(nextName, nextPage);
+    if (
+      prevSearch !== currentSearch ||
+      prevGalleryPage !== currentGalleryPage
+    ) {
+      this.updateImages();
     }
   }
 
-  fetchImages(nextName, nextPage) {
-    pixabayAPI(nextName, nextPage)
-      .then(data => {
-        this.setState(prevState => {
-          return {
-            prevState,
-            images: [...prevState.images, ...data.hits],
-            status: Status.RESOLVED,
-            imageSearch: nextName,
-          };
-        });
+  updateImages() {
+    const { searchRequest, galleryPage } = this.state;
+    this.setState({ isLoading: true });
 
-        if (this.prevPage !== nextPage) {
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth',
-          });
+    try {
+      pixabayAPI(searchRequest, galleryPage).then(data => {
+        if (!data.data.hits.length) {
+          return alert('There is no images found with that search request');
         }
-      })
-      .catch(error => this.setState({ error, status: Status.REJECTED }));
+        const mappedImages = data.data.hits.map(
+          ({ id, webformatURL, tags, largeImageURL }) => ({
+            id,
+            webformatURL,
+            tags,
+            largeImageURL,
+          })
+        );
+        this.setState({
+          images: [...this.state.images, ...mappedImages],
+        });
+      });
+    } catch (error) {
+      this.setState({ error });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   }
 
-  toggleModal = largeImageURL => {
-    this.setState(({ showModal, biggerImage }) => ({
-      showModal: !showModal,
-      biggerImage: largeImageURL,
-    }));
+  handleSearchSubmit = searchRequest => {
+    this.setState({
+      searchRequest,
+      images: [],
+      galleryPage: 1,
+    });
   };
 
-  hiddenModal = () => {
-    this.setState({ showModal: false });
+  loadMore = () => {
+    this.setState(prevState => ({
+      galleryPage: prevState.galleryPage + 1,
+    }));
   };
 
   showModalImage = id => {
     const image = this.state.images.find(image => image.id === id);
     this.setState({
-      data: {
+      showModal: {
         largeImageURL: image.largeImageURL,
         tags: image.tags,
       },
     });
-    this.toggleModal();
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
-
-  formSubmitHandler = request => {
-    this.setState({ request });
+  closeModalImage = () => {
+    this.setState({ showModal: null });
   };
 
   render() {
-    const { hiddenModal, loadMore } = this;
-    const imgs = this.state.images;
-    const { request } = this.props;
-    const { status, showModal, toggleModal, data } = this.state;
-
-    if (status === Status.PENDING) {
-      return <Loader />;
-    }
-    if (status === Status.REJECTED || (imgs && imgs.length === 0)) {
-      return (
-        <div className={s.Error}>
-          Что то пошло не так. Ваш запрос "{request}" не найден
-        </div>
-      );
-    }
-    if (status === Status.RESOLVED) {
-      return (
-        <div className={s.Button}>
-          {showModal && (
-            <Modal
-              onClick={toggleModal}
-              lgImage={data.largeImageURL}
-              tags={data.tags}
-              hiddenModal={hiddenModal}
-            />
-          )}
-          {imgs.length >= 12 && <Button loadMore={loadMore} />}
-        </div>
-      );
-    }
+    const { images, isLoading, error, showModal } = this.state;
+    return (
+      <>
+        <Searchbar onSearch={this.handleSearchSubmit} />
+        {error && alert(`Whoops, something went wrong: ${error.message}`)}
+        {isLoading && <Loader color={'#3f51b5'} size={32} />}
+        {images.length > 0 && (
+          <>
+            <ImageGallery images={images} handlePreview={this.showModalImage} />
+            <Button loadMore={this.loadMore} />
+          </>
+        )}
+        {showModal && (
+          <Modal
+            lgImage={showModal.largeImageURL}
+            tags={showModal.tags}
+            closeModal={this.closeModalImage}
+          />
+        )}
+      </>
+    );
   }
 }

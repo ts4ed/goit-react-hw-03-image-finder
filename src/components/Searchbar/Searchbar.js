@@ -4,20 +4,21 @@ import PropTypes from 'prop-types';
 
 export default class Searchbar extends Component {
   state = {
-    search: '',
+    searchRequest: '',
   };
 
   searchForm = e => {
     e.preventDefault();
-    if (this.state.search.trim() === '') {
+    if (this.state.searchRequest.trim() === '') {
       alert('Введите запрос');
       return;
     }
-    this.props.onSubmitData(this.state.search);
-    this.setState({ search: '' });
+    this.props.onSearch(this.state.searchRequest);
+    this.setState({ searchRequest: '' });
+    // console.log(this.state.searchRequest);
   };
   handleChangeInput = e => {
-    this.setState({ search: e.currentTarget.value });
+    this.setState({ searchRequest: e.currentTarget.value });
   };
   render() {
     return (

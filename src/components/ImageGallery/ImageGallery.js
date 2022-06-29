@@ -1,8 +1,9 @@
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
+import s from './ImageGallery.module.css';
 
-export default function ImageGallery({ images, toggleModal }) {
+export default function ImageGallery({ images, handlePreview }) {
   return (
-    <ul className="ImageGallery">
+    <ul className={s.ImageGallery}>
       {images.map(({ id, tags, webformatURL, largeImageURL }) => (
         <ImageGalleryItem
           key={id}
@@ -10,7 +11,7 @@ export default function ImageGallery({ images, toggleModal }) {
           smallImage={webformatURL}
           largeImage={largeImageURL}
           onClickItem={() => {
-            toggleModal(largeImageURL);
+            handlePreview(id);
           }}
         />
       ))}
