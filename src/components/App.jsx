@@ -90,6 +90,7 @@ export default class App extends Component {
 
   render() {
     const { images, isLoading, error, showModal } = this.state;
+    const lenhthGallery = 12;
     return (
       <>
         <Searchbar onSearch={this.handleSearchSubmit} />
@@ -100,7 +101,7 @@ export default class App extends Component {
             <ImageGallery images={images} handlePreview={this.showModalImage} />
           </>
         )}
-        {images.length > 0 && images.length <= 12 && (
+        {images.length > 0 && images.length <= lenhthGallery && (
           <>
             <Button loadMore={this.loadMore} />
           </>
