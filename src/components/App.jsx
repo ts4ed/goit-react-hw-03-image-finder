@@ -98,9 +98,14 @@ export default class App extends Component {
         {images.length > 0 && (
           <>
             <ImageGallery images={images} handlePreview={this.showModalImage} />
+          </>
+        )}
+        {images.length > 0 && images.length <= 12 && (
+          <>
             <Button loadMore={this.loadMore} />
           </>
         )}
+
         {showModal && (
           <Modal
             lgImage={showModal.largeImageURL}
