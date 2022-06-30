@@ -7,7 +7,6 @@ import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 import Button from './Button/Button';
 import pixabayAPI from '../Services/pixabay-api';
-import { isVisible } from '@testing-library/user-event/dist/utils';
 
 const PER_PAGE = 12;
 
@@ -42,12 +41,13 @@ export default class App extends Component {
 
     try {
       pixabayAPI(searchRequest, galleryPage).then(({ data }) => {
-        console.log(data);
-        console.log(Math.ceil(data.totalHits / PER_PAGE));
-        if (!data.hits.length) {
+        const { totalHits, hits } = data;
+        // console.log(hits);
+        // console.log(Math.ceil(totalHits / PER_PAGE));
+        if (!hits.length) {
           return alert('There is no images found with that search request');
         }
-        const mappedImages = data.hits.map(
+        const mappedImages = hits.map(
           ({ id, webformatURL, tags, largeImageURL }) => ({
             id,
             webformatURL,
@@ -57,7 +57,7 @@ export default class App extends Component {
         );
         this.setState({
           images: [...this.state.images, ...mappedImages],
-          isVisible: galleryPage < Math.ceil(data.totalHits / PER_PAGE),
+          isVisible: galleryPage < Math.ceil(totalHits / PER_PAGE),
         });
       });
     } catch (error) {
@@ -96,7 +96,8 @@ export default class App extends Component {
   };
 
   render() {
-    const { images, isLoading, error, showModal } = this.state;
+    const { images, isLoading, error, isVisible, showModal } = this.state;
+    // console.log(isVisible);
     return (
       <>
         <Searchbar onSearch={this.handleSearchSubmit} />
