@@ -7,6 +7,9 @@ import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 import Button from './Button/Button';
 import pixabayAPI from '../Services/pixabay-api';
+import { isVisible } from '@testing-library/user-event/dist/utils';
+
+const PER_PAGE = 12;
 
 export default class App extends Component {
   state = {
@@ -16,6 +19,7 @@ export default class App extends Component {
     error: null,
     isLoading: false,
     showModal: null,
+    isVisible: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -37,11 +41,13 @@ export default class App extends Component {
     this.setState({ isLoading: true });
 
     try {
-      pixabayAPI(searchRequest, galleryPage).then(data => {
-        if (!data.data.hits.length) {
+      pixabayAPI(searchRequest, galleryPage).then(({ data }) => {
+        console.log(data);
+        console.log(Math.ceil(data.totalHits / PER_PAGE));
+        if (!data.hits.length) {
           return alert('There is no images found with that search request');
         }
-        const mappedImages = data.data.hits.map(
+        const mappedImages = data.hits.map(
           ({ id, webformatURL, tags, largeImageURL }) => ({
             id,
             webformatURL,
@@ -51,6 +57,7 @@ export default class App extends Component {
         );
         this.setState({
           images: [...this.state.images, ...mappedImages],
+          isVisible: galleryPage < Math.ceil(data.totalHits / PER_PAGE),
         });
       });
     } catch (error) {
@@ -90,22 +97,15 @@ export default class App extends Component {
 
   render() {
     const { images, isLoading, error, showModal } = this.state;
-    const lenhthGallery = 12;
     return (
       <>
         <Searchbar onSearch={this.handleSearchSubmit} />
         {error && alert(`Whoops, something went wrong: ${error.message}`)}
         {isLoading && <Loader color={'#3f51b5'} size={32} />}
         {images.length > 0 && (
-          <>
-            <ImageGallery images={images} handlePreview={this.showModalImage} />
-          </>
+          <ImageGallery images={images} handlePreview={this.showModalImage} />
         )}
-        {images.length > 0 && images.length <= lenhthGallery && (
-          <>
-            <Button loadMore={this.loadMore} />
-          </>
-        )}
+        {isVisible && !error && <Button loadMore={this.loadMore} />}
 
         {showModal && (
           <Modal
